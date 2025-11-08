@@ -5,7 +5,6 @@
 package general;
 import java.sql.*;
 import java.io.*;
-import java.awt.*;
 import javax.swing.*;
 import database.DatabaseConnection;
 import java.text.SimpleDateFormat;
@@ -34,8 +33,24 @@ public class BasicFunction {
 
     private final String removeQuery = "DELETE FROM student WHERE stud_ID = ?"
                         + "ALTER TABLE student AUTO_INCREMENT = 1;";
-    
+
+    private final String parseInfo = "SELECT stud_address, stud_sex FROM student WHERE stud_ID = ?";
+
+    private final String updateQuery = "UPDATE student SET " +
+            "stud_ID = ?, " +
+            "stud_firstName = ?, " +
+            "stud_middleInitial = ?, " +
+            "stud_lastName = ?, " +
+            "stud_age = ?, " +
+            "stud_sex = ?, " +
+            "stud_course = ?, " +
+            "stud_yearLevel = ?, " +
+            "sport_id = ?, " +
+            "stud_address = ? " +
+            "WHERE stud_ID = ?";
     public void saveData() {
+
+        String selectedID = frame.getSelectID();
         // Access text fields
         String firstName = frame.getFNTextField().getText();
         String middleInitial = frame.getMITextField().getText();
@@ -64,9 +79,13 @@ public class BasicFunction {
             JOptionPane.showMessageDialog(frame, "Input must be number");
             return;
         }
+        //check if the user is trying to update or add
+        String query;
+        query = (selectedID == null || selectedID.isEmpty()) ? saveQuery : updateQuery;
 
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement stmt = con.prepareStatement(saveQuery);) {
+             PreparedStatement stmt = con.prepareStatement(query);) {
+
             Object[] param = {
                     studentId,
                     firstName,
@@ -95,7 +114,6 @@ public class BasicFunction {
             frame.getMITextField().setText("");
             frame.getLNTextField().setText("");
             frame.getFNTextField().setText("");
-
 
             loadTableData();
         } catch (SQLException ex) {
@@ -127,6 +145,8 @@ public class BasicFunction {
             }
             con.close();
             stmt.close();
+            rs.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
             javax.swing.JOptionPane.showMessageDialog(frame, "Connection Failed" + e.getMessage());
@@ -225,4 +245,38 @@ public class BasicFunction {
             }
         }
     }
-}
+        public void parseInfo(){
+            String studID=frame.getSelectedID();
+            if(studID.isEmpty()){
+                return;
+            }
+
+            try (Connection conn = DatabaseConnection.getConnection(); //
+                PreparedStatement pstmt = conn.prepareStatement(parseInfo);){
+
+                pstmt.setString(1, studID);
+                ResultSet rs = pstmt.executeQuery();
+
+                if(rs.next()) {
+                    String address = rs.getString("stud_address");
+                    String sex = rs.getString("stud_sex");
+
+                    System.out.println("Found address: " + address); // Debug line
+                    System.out.println("Found sex: " + sex); // Debug line
+
+                    frame.getAddTextField().setText(address != null ? address : "");
+                    frame.getSexComboBox().setSelectedItem(sex != null ? sex : "M");
+                } else {
+                    System.out.println("No record found for ID: " + studID); // Debug line
+                }
+
+                rs.close();
+                pstmt.close();
+                conn.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Error loading additional data: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+

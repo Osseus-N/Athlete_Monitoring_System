@@ -298,8 +298,49 @@ public class Frame extends javax.swing.JFrame implements ActionListener {
                 int selectedRow=athleteTable.getSelectedRow();
 
                 if(selectedRow != -1){
-                    selectedID.setText( athleteTable.getValueAt(selectedRow, 0).toString());
-                 }
+
+                    String studID = athleteTable.getValueAt(selectedRow, 0).toString();
+                    studIdTextField.setText(studID);
+                    selectedID.setText(studID);
+                    // Parse full name (format: "FirstName MiddleInitial. LastName")
+                    String fullName = athleteTable.getValueAt(selectedRow, 1).toString();
+                    String[] nameParts = fullName.split(" ");
+
+                    String firstName = "";
+                    String middleInitial = "";
+                    String lastName = "";
+
+                    if (nameParts.length >= 3) {
+                        firstName = nameParts[0].trim();
+                        // Remove the period from middle initial (e.g., "A." -> "A")
+                        middleInitial = nameParts[1].replace(".", "").trim();
+                        // Last name might be multiple words, so join remaining parts
+                        StringBuilder lastNameBuilder = new StringBuilder();
+                        for (int i = 2; i < nameParts.length; i++) {
+                            lastNameBuilder.append(nameParts[i]);
+                            if (i < nameParts.length - 1) lastNameBuilder.append(" ");
+                        }
+                        lastName = lastNameBuilder.toString().trim();
+                    } else if (nameParts.length == 2) {
+                        firstName = nameParts[0].trim();
+                        lastName = nameParts[1].trim();
+                    } else if (nameParts.length == 1) {
+                        firstName = nameParts[0].trim();
+                    }
+                    //set textfield
+                    fNTextField.setText(firstName);
+                    mITextField.setText(middleInitial);
+                    lNTextField.setText(lastName);
+                    ageTextField.setText(athleteTable.getValueAt(selectedRow, 2).toString());
+
+                    // Set combo box
+                    yearLevelComboBox.setSelectedItem(athleteTable.getValueAt(selectedRow, 3).toString());
+                    courseComboBox.setSelectedItem(athleteTable.getValueAt(selectedRow, 4).toString());
+                    sportCombobox.setSelectedItem(athleteTable.getValueAt(selectedRow, 5).toString());
+
+                    //use mysql for getting address and sport
+                    function.parseInfo();
+                }
             }
         });
 
@@ -492,10 +533,13 @@ public class Frame extends javax.swing.JFrame implements ActionListener {
     public JComboBox<String> getCourseComboBox() {
         return courseComboBox;
     }
-    public JLabel getSelectedID() {
+
+    public String getSelectedID(){
+        int selectedRow=athleteTable.getSelectedRow();
+
+        String selectedID = athleteTable.getValueAt(selectedRow, 0).toString();
         return selectedID;
     }
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel LastName;
