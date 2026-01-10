@@ -8,9 +8,9 @@ import java.sql.*;
 public class DatabaseConnection {
     
   
-    private static final String URL = "jdbc:mysql://localhost:3306/athlete_db";
-    private static final String USER = "root";
-    private static final String PASSWORD = "Ndomingo30!"; 
+    private static final String URL = "";
+    private static final String USER = "";
+    private static final String PASSWORD = ""; 
 
     public static Connection getConnection() {
         Connection con = null;
